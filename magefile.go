@@ -24,7 +24,7 @@ var (
 	WasmPath   string // wasm subdir
 )
 
-// initPaths populates the global path variabls that define the project tree
+// initPaths populates the global path variables that define the project tree
 func initPaths() {
 	must := func(_err error) {
 		if _err != nil {
@@ -64,4 +64,16 @@ func Test() {
 	mg.Deps(Build)
 	// launch the server
 	sh.Run(path.Join(MageRoot, "serve"))
+}
+
+func Clean() {
+	initPaths()
+	must := func(_err error) {
+		if _err != nil {
+			log.Fatal(_err)
+		}
+	}
+	must(os.Remove(path.Join(MageRoot, "serve")))
+	must(os.Remove(path.Join(AssetsPath, "json.wasm")))
+	must(os.Remove(path.Join(AssetsPath, "wasm_exec.js")))
 }
