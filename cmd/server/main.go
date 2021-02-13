@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"internal/common"
+	"github.com/Michael-F-Ellis/wasmskel/cmd/internal/common"
 )
 
 var MonitoredParametersState = common.MonitoredParameters{}
