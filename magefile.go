@@ -52,6 +52,7 @@ func Build() {
 			log.Fatal(_err)
 		}
 	}
+	defer os.Chdir(MageRoot)
 	// Install fresh copy of wasm_exec.js from go installation
 	must(sh.Run("cp", fmt.Sprintf("%s/misc/wasm/wasm_exec.js", GoRoot), AssetsPath))
 	// Build and install the WASM
