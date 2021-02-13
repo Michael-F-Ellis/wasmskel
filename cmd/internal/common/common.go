@@ -17,7 +17,7 @@ func (mp *MonitoredParameters) Get() *MonitoredParameters {
 	return &safeCopy
 }
 
-func (mp *MonitoredParameters) directUpdate(f func(p *MonitoredParameters)) {
+func (mp *MonitoredParameters) DirectUpdate(f func(p *MonitoredParameters)) {
 	MPMutex.Lock()
 	defer MPMutex.Unlock()
 	f(mp)

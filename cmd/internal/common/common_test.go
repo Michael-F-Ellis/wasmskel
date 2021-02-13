@@ -23,7 +23,7 @@ func TestDirectUpdate(t *testing.T) {
 	f := func(p *MonitoredParameters) {
 		p.B = 13
 	}
-	mp.directUpdate(f)
+	mp.DirectUpdate(f)
 	p := mp.Get()
 	if diff := deep.Equal(mp, p); diff != nil {
 		t.Errorf("%v", diff)

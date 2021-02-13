@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"syscall/js"
 	"time"
+
+	"github.com/Michael-F-Ellis/wasmskel/cmd/internal/common"
 )
 
 func main() {
@@ -73,7 +75,7 @@ func prettyJson(input string) (string, error) {
 // and updates the jsonInputTextArea in the document.  It must be invoked
 // as a goroutine.
 func getter() {
-	mp := &MonitoredParameters{}
+	mp := &common.MonitoredParameters{}
 	for {
 		var err error
 		time.Sleep(time.Second)

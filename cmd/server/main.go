@@ -64,7 +64,7 @@ func fail(w http.ResponseWriter, msg string, status int) {
 
 // GetJSON returns a JSON representation of the values of
 // MonitorParameters that are part of the JSON API.
-func GetJSON(mp *MonitoredParameters) (jsn []byte, err error) {
+func GetJSON(mp *common.MonitoredParameters) (jsn []byte, err error) {
 
 	mpcopy := mp.Get()
 	jsn, err = json.Marshal(mpcopy)
@@ -73,12 +73,12 @@ func GetJSON(mp *MonitoredParameters) (jsn []byte, err error) {
 
 // updater continually changes MonitoredParameters state
 func updater() {
-	f := func(p *MonitoredParameters) {
+	f := func(p *common.MonitoredParameters) {
 		p.A += 1
 		p.B += 2
 	}
 	for {
 		time.Sleep(time.Second)
-		MonitoredParametersState.directUpdate(f)
+		MonitoredParametersState.DirectUpdate(f)
 	}
 }
