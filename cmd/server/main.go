@@ -6,9 +6,11 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"internal/common"
 )
 
-var MonitoredParametersState = MonitoredParameters{}
+var MonitoredParametersState = common.MonitoredParameters{}
 
 func main() {
 	go updater()

@@ -1,4 +1,4 @@
-package main
+package common
 
 // Code used in both wasm and server
 import "sync"
