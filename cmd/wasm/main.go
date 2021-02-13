@@ -3,12 +3,16 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"syscall/js"
+	"time"
 )
 
 func main() {
 	fmt.Println("Go Web Assembly")
 	js.Global().Set("formatJSON", jsonWrapper())
+	go getter()
 	select {}
 }
 
@@ -62,4 +66,49 @@ func prettyJson(input string) (string, error) {
 		return "", err
 	}
 	return string(pretty), nil
+}
+
+// getter fetches MonitoredParametersState from the server once per second
+// and updates the jsonInputTextArea in the document.  It must be invoked
+// as a goroutine.
+func getter() {
+	mp := &MonitoredParameters{}
+	for {
+		var err error
+		time.Sleep(time.Second)
+		req, err := http.NewRequest("GET", "/get", nil)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		client := &http.Client{}
+		client.Timeout = 500 * time.Millisecond
+		resp, err := client.Do(req)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		defer resp.Body.Close()
+		jsDoc := js.Global().Get("document")
+		if !jsDoc.Truthy() {
+			err = fmt.Errorf("unable to get document object")
+			fmt.Println(err)
+			continue
+		}
+		jsonInputTextArea := jsDoc.Call("getElementById", "jsoninput")
+		if !jsonInputTextArea.Truthy() {
+			err = fmt.Errorf("unable to get jsoninput text area")
+			fmt.Println(err)
+			continue
+		}
+		body, _ := ioutil.ReadAll(resp.Body)
+		err = json.Unmarshal(body, mp)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		// jsonInputTextArea.Set("value", fmt.Sprintf("%v", *mp))
+		jsonInputTextArea.Set("value", string(body))
+
+	}
 }
