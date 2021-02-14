@@ -1,5 +1,3 @@
 serve
 assets/wasm_exec.js
 assets/json.wasm
-cmd/server/common.go
-cmd/wasm/common.go

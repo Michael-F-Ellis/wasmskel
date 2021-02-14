@@ -19,7 +19,6 @@ var (
 	MageRoot     string // location of this file
 	GoRoot       string // path to go installation
 	AssetsPath   string // assets subdir
-	CmdPath      string // cmd subdir
 	InternalPath string // cmd/internal subdir
 	CommonPath   string // common subdir
 	ServerPath   string // server subdir
@@ -40,11 +39,10 @@ func initPaths() {
 	must(err)
 	fmt.Println(MageRoot)
 	AssetsPath = path.Join(MageRoot, "assets")
-	CmdPath = path.Join(MageRoot, "cmd")
-	InternalPath = path.Join(CmdPath, "internal")
+	InternalPath = path.Join(MageRoot, "internal")
 	CommonPath = path.Join(InternalPath, "common")
-	ServerPath = path.Join(CmdPath, "server")
-	WasmPath = path.Join(CmdPath, "wasm")
+	ServerPath = path.Join(MageRoot, "server")
+	WasmPath = path.Join(MageRoot, "wasm")
 }
 
 func Build() {

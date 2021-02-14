@@ -1,15 +1,17 @@
 // +build js,wasm
+
 package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"syscall/js"
 	"time"
 
-	"github.com/Michael-F-Ellis/wasmskel/cmd/internal/common"
+	"github.com/Michael-F-Ellis/wasmskel/internal/common"
 )
 
 func main() {
@@ -28,17 +30,10 @@ func jsonWrapper() js.Func {
 			}
 			return result
 		}
-		jsDoc := js.Global().Get("document")
-		if !jsDoc.Truthy() {
+		jsonOuputTextArea, err := getElementById("jsonoutput")
+		if err != nil {
 			result := map[string]interface{}{
-				"error": "Unable to get document object",
-			}
-			return result
-		}
-		jsonOuputTextArea := jsDoc.Call("getElementById", "jsonoutput")
-		if !jsonOuputTextArea.Truthy() {
-			result := map[string]interface{}{
-				"error": "Unable to get output text area",
+				"error": err.Error(),
 			}
 			return result
 		}
@@ -56,6 +51,23 @@ func jsonWrapper() js.Func {
 		return nil
 	})
 	return jsonfunc
+}
+
+// NoDocumentError is returned if the global document is not available
+var NoDocumentError = errors.New("unable to get document object")
+
+// getElementById is a wasm-side call to get a js Value by its id
+func getElementById(id string) (el js.Value, err error) {
+	jsDoc := js.Global().Get("document")
+	if !jsDoc.Truthy() {
+		err = NoDocumentError
+		return
+	}
+	el = jsDoc.Call("getElementById", "jsonoutput")
+	if !el.Truthy() {
+		err = fmt.Errorf("Unable to get element with id %s", id)
+	}
+	return
 }
 
 // prettyJson prints indented JSON
