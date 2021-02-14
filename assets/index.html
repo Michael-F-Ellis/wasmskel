@@ -12,19 +12,33 @@
 </head>
 
 <body>
-    <textarea id="jsoninput" name="jsoninput" cols="80" rows="20"></textarea>
-    <input id="button" type="submit" name="button" value="pretty json" onclick="json(jsoninput.value)" />
-    <textarea id="jsonoutput" name="jsonoutput" cols="80" rows="20"></textarea>
+    <div>
+    </div>
+    <div>
+        <table>
+            <tr>
+                <td>A</td>
+                <td id="A"></td>
+            </tr>
+            </tr>
+            <tr>
+                <td>B</td>
+                <td id="B"></td>
+            </tr>
+            </tr>
+        </table>
+    </div>
 </body>
-<script>
+<!-- <script>
     var json = function (input) {
-        var result = formatJSON(input)
-        if ((result != null) && ('error' in result)) {
-            console.log("Go return value", result)
-            jsonoutput.value = ""
-            alert(result.error)
-        }
+    var result = formatJSON(input)
+    if ((result != null) && ('error' in result)) {
+    console.log("Go return value", result)
+    jsonoutput.value = ""
+    alert(result.error)
     }
-</script>
+    }
+    </script>
+    -->
 
-</html>>
+</html>

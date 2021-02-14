@@ -20,11 +20,11 @@ var SP = &State
 
 func main() {
 	fmt.Println("Go Web Assembly")
-	js.Global().Set("formatJSON", jsonWrapper())
 	go getter()
 	select {}
 }
 
+/*
 // jsonWrapper wraps prettyJson so it can be calld from javascript
 func jsonWrapper() js.Func {
 	jsonfunc := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
@@ -56,6 +56,7 @@ func jsonWrapper() js.Func {
 	})
 	return jsonfunc
 }
+*/
 
 // NoDocumentError is returned if the global document is not available
 var NoDocumentError = errors.New("unable to get document object")
@@ -74,19 +75,20 @@ func getElementById(id string) (el js.Value, err error) {
 	return
 }
 
-// setElementValueById assigns a string value to a DOM element
+// setElementAttributeById assigns a string value to a DOM element
 // with id.
-func setElementValueById(id, value string) (err error) {
+func setElementAttributeById(id, attr, value string) (err error) {
 	el, err := getElementById(id)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	el.Set("value", value)
+	el.Set(attr, value)
 
 	return
 }
 
+/*
 // prettyJson prints indented JSON
 func prettyJson(input string) (string, error) {
 	var raw interface{}
@@ -99,21 +101,26 @@ func prettyJson(input string) (string, error) {
 	}
 	return string(pretty), nil
 }
+*/
 
-// getter fetches MonitoredParametersState from the server once per second
-// and updates the jsonInputTextArea in the document.  It must be invoked
-// as a goroutine.
+// getter fetches State from the server once per second. It must be invoked as a
+// goroutine.
 func getter() {
 	for {
 		var err error
 		time.Sleep(time.Second)
-		jbytes, err := getStateFromServer()
+		_, err = getStateFromServer()
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 
-		err = setElementValueById("jsoninput", string(jbytes))
+		err = setElementAttributeById("A", "textContent", fmt.Sprintf("%0.2f", SP.A))
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		err = setElementAttributeById("B", "textContent", fmt.Sprintf("%0.2f", SP.B))
 		if err != nil {
 			fmt.Println(err)
 			continue
@@ -147,6 +154,6 @@ func getStateFromServer() (jbytes []byte, err error) {
 		fmt.Println(err)
 		return
 	}
-	SP.DirectUpdate(func(p *common.State) { *SP = *p })
+	SP.DirectUpdate(func(p *common.State) { *p = *mp })
 	return
 }
