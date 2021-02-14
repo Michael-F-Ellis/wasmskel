@@ -14,6 +14,10 @@ import (
 	"github.com/Michael-F-Ellis/wasmskel/internal/common"
 )
 
+// global copy of state obtained periodically from server
+var MonitoredParametersState = common.MonitoredParameters{}
+var MP = &MonitoredParametersState
+
 func main() {
 	fmt.Println("Go Web Assembly")
 	js.Global().Set("formatJSON", jsonWrapper())
@@ -63,7 +67,7 @@ func getElementById(id string) (el js.Value, err error) {
 		err = NoDocumentError
 		return
 	}
-	el = jsDoc.Call("getElementById", "jsonoutput")
+	el = jsDoc.Call("getElementById", id)
 	if !el.Truthy() {
 		err = fmt.Errorf("Unable to get element with id %s", id)
 	}
@@ -87,43 +91,50 @@ func prettyJson(input string) (string, error) {
 // and updates the jsonInputTextArea in the document.  It must be invoked
 // as a goroutine.
 func getter() {
-	mp := &common.MonitoredParameters{}
 	for {
 		var err error
 		time.Sleep(time.Second)
-		req, err := http.NewRequest("GET", "/get", nil)
+		jbytes, err := getMPFromServer()
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		client := &http.Client{}
-		client.Timeout = 500 * time.Millisecond
-		resp, err := client.Do(req)
+
+		jsonInputTextArea, err := getElementById("jsoninput")
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		defer resp.Body.Close()
-		jsDoc := js.Global().Get("document")
-		if !jsDoc.Truthy() {
-			err = fmt.Errorf("unable to get document object")
-			fmt.Println(err)
-			continue
-		}
-		jsonInputTextArea := jsDoc.Call("getElementById", "jsoninput")
-		if !jsonInputTextArea.Truthy() {
-			err = fmt.Errorf("unable to get jsoninput text area")
-			fmt.Println(err)
-			continue
-		}
-		body, _ := ioutil.ReadAll(resp.Body)
-		err = json.Unmarshal(body, mp)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-		// jsonInputTextArea.Set("value", fmt.Sprintf("%v", *mp))
-		jsonInputTextArea.Set("value", string(body))
+		jsonInputTextArea.Set("value", string(jbytes))
 
 	}
+}
+
+// getMP fetches the current values in MonitoredParametersState from the server and
+// updates a local copy. It also returns the JSON byte slice that came from
+// the server.
+func getMPFromServer() (jbytes []byte, err error) {
+	req, err := http.NewRequest("GET", "/get", nil)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	client := &http.Client{}
+	client.Timeout = 500 * time.Millisecond
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer resp.Body.Close()
+
+	jbytes, _ = ioutil.ReadAll(resp.Body)
+	mp := &common.MonitoredParameters{}
+	err = json.Unmarshal(jbytes, mp)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	MP.DirectUpdate(func(p *common.MonitoredParameters) { *MP = *p })
+	return
 }
