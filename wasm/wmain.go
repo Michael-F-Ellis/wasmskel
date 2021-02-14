@@ -15,8 +15,8 @@ import (
 )
 
 // global copy of state obtained periodically from server
-var MonitoredParametersState = common.MonitoredParameters{}
-var MP = &MonitoredParametersState
+var State = common.State{}
+var SP = &State
 
 func main() {
 	fmt.Println("Go Web Assembly")
@@ -74,6 +74,19 @@ func getElementById(id string) (el js.Value, err error) {
 	return
 }
 
+// setElementValueById assigns a string value to a DOM element
+// with id.
+func setElementValueById(id, value string) (err error) {
+	el, err := getElementById(id)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	el.Set("value", value)
+
+	return
+}
+
 // prettyJson prints indented JSON
 func prettyJson(input string) (string, error) {
 	var raw interface{}
@@ -94,26 +107,25 @@ func getter() {
 	for {
 		var err error
 		time.Sleep(time.Second)
-		jbytes, err := getMPFromServer()
+		jbytes, err := getStateFromServer()
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 
-		jsonInputTextArea, err := getElementById("jsoninput")
+		err = setElementValueById("jsoninput", string(jbytes))
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		jsonInputTextArea.Set("value", string(jbytes))
 
 	}
 }
 
-// getMP fetches the current values in MonitoredParametersState from the server and
+// getStateFromServer fetches the current values in State from the server and
 // updates a local copy. It also returns the JSON byte slice that came from
 // the server.
-func getMPFromServer() (jbytes []byte, err error) {
+func getStateFromServer() (jbytes []byte, err error) {
 	req, err := http.NewRequest("GET", "/get", nil)
 	if err != nil {
 		fmt.Println(err)
@@ -129,12 +141,12 @@ func getMPFromServer() (jbytes []byte, err error) {
 	defer resp.Body.Close()
 
 	jbytes, _ = ioutil.ReadAll(resp.Body)
-	mp := &common.MonitoredParameters{}
+	mp := &common.State{}
 	err = json.Unmarshal(jbytes, mp)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	MP.DirectUpdate(func(p *common.MonitoredParameters) { *MP = *p })
+	SP.DirectUpdate(func(p *common.State) { *SP = *p })
 	return
 }

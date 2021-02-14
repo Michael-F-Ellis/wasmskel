@@ -10,7 +10,7 @@ import (
 	"github.com/Michael-F-Ellis/wasmskel/internal/common"
 )
 
-var MonitoredParametersState = common.MonitoredParameters{}
+var State = common.State{}
 
 func main() {
 	go updater()
@@ -35,8 +35,8 @@ func jsonWasmRequestHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getRequestHandler(w http.ResponseWriter, r *http.Request) {
-	mpStateP := MonitoredParametersState.Get()
-	jsonRecord, err := GetJSON(mpStateP)
+	stateP := State.Get()
+	jsonRecord, err := GetJSON(stateP)
 	if err != nil { // should never happen in this scenario
 		err = fmt.Errorf("can't marshal the record: %v", err)
 		fail(w, err.Error(), http.StatusInternalServerError)
@@ -64,21 +64,21 @@ func fail(w http.ResponseWriter, msg string, status int) {
 
 // GetJSON returns a JSON representation of the values of
 // MonitorParameters that are part of the JSON API.
-func GetJSON(mp *common.MonitoredParameters) (jsn []byte, err error) {
+func GetJSON(sp *common.State) (jsn []byte, err error) {
 
-	mpcopy := mp.Get()
+	mpcopy := sp.Get()
 	jsn, err = json.Marshal(mpcopy)
 	return
 }
 
 // updater continually changes MonitoredParameters state
 func updater() {
-	f := func(p *common.MonitoredParameters) {
+	f := func(p *common.State) {
 		p.A += 1
 		p.B += 2
 	}
 	for {
 		time.Sleep(time.Second)
-		MonitoredParametersState.DirectUpdate(f)
+		State.DirectUpdate(f)
 	}
 }

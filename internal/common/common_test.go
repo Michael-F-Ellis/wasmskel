@@ -7,7 +7,7 @@ import (
 )
 
 func TestGet(t *testing.T) {
-	mp := MonitoredParameters{1, 2}
+	mp := State{1, 2}
 	mpCopy := *mp.Get()
 	if diff := deep.Equal(mp, mpCopy); diff != nil {
 		t.Errorf("%v", diff)
@@ -19,8 +19,8 @@ func TestGet(t *testing.T) {
 }
 
 func TestDirectUpdate(t *testing.T) {
-	mp := &MonitoredParameters{1, 2}
-	f := func(p *MonitoredParameters) {
+	mp := &State{1, 2}
+	f := func(p *State) {
 		p.B = 13
 	}
 	mp.DirectUpdate(f)
