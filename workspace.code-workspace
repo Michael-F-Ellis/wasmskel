@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "server"
+		},
+		{
+			"path": "internal"
+		},
+		{
+			"path": "wasm"
+		},
+		{
+			"path": "assets"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {}
+}
