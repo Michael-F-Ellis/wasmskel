@@ -1,44 +1,33 @@
-<html>
 
-<head>
-    <meta charset="utf-8" />
-    <script src="/wasm_exec.js"></script>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description", content="PGC Remote Interface">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <script src="/wasm_exec.js" charset=UTF-8>
+    </script>
     <script>
-        const go = new Go();
+		// Load and launch our wasm component
+		const go = new Go();
         WebAssembly.instantiateStreaming(fetch("/json.wasm"), go.importObject).then((result) => {
             go.run(result.instance);
         });
     </script>
-</head>
-
-<body>
-    <div>
-    </div>
-    <div>
-        <table>
-            <tr>
-                <td>A</td>
-                <td id="A"></td>
-            </tr>
-            </tr>
-            <tr>
-                <td>B</td>
-                <td id="B"></td>
-            </tr>
-            </tr>
-        </table>
-    </div>
-</body>
-<!-- <script>
-    var json = function (input) {
-    var result = formatJSON(input)
-    if ((result != null) && ('error' in result)) {
-    console.log("Go return value", result)
-    jsonoutput.value = ""
-    alert(result.error)
-    }
-    }
-    </script>
-    -->
-
+  </head>
+  <body>
+    <table class="PARM">
+      <tr class="PARM">
+        <td class="PARM">Alpha
+        </td>
+        <td id="Alpha" class="PARM">
+        </td>
+      </tr>
+      <tr class="PARM">
+        <td class="PARM">Beta
+        </td>
+        <td id="Beta" class="PARM">
+        </td>
+      </tr>
+    </table>
+  </body>
 </html>

@@ -114,18 +114,8 @@ func getter() {
 			fmt.Println(err)
 			continue
 		}
-
-		err = setElementAttributeById("A", "textContent", fmt.Sprintf("%0.2f", SP.A))
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-		err = setElementAttributeById("B", "textContent", fmt.Sprintf("%0.2f", SP.B))
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-
+		// Write new values to readouts in web page
+		updateStateTable()
 	}
 }
 

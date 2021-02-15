@@ -53,9 +53,14 @@ func Build() {
 		}
 	}
 	defer os.Chdir(MageRoot)
+	// Generate the common state struct
+	must(mkState())
+	// Generate the web page
+	must(mkIndexPage())
 	// Install fresh copy of wasm_exec.js from go installation
 	must(sh.Run("cp", fmt.Sprintf("%s/misc/wasm/wasm_exec.js", GoRoot), AssetsPath))
 	// Build and install the WASM
+	must(mkUpdater())
 	must(os.Chdir(WasmPath))
 	must(sh.Run("env", "GOOS=js", "GOARCH=wasm", "go", "build", "-o", path.Join(AssetsPath, "json.wasm")))
 	// Build and install the server

@@ -74,8 +74,8 @@ func GetJSON(sp *common.State) (jsn []byte, err error) {
 // updater continually changes MonitoredParameters state
 func updater() {
 	f := func(p *common.State) {
-		p.A += 1
-		p.B += 2
+		p.Alpha += 1
+		p.Beta += 2
 	}
 	for {
 		time.Sleep(time.Second)
