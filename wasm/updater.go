@@ -17,6 +17,10 @@
 	if err != nil {
 		fmt.Println(err)
 	}
+	err = setElementAttributeById("Delta", "textContent", fmt.Sprintf("%0.2f", SP.Delta))
+	if err != nil {
+		fmt.Println(err)
+	}
 	return
 	}
 	

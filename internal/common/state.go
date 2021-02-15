@@ -7,5 +7,6 @@
 	
 	    Alpha float64
 	    Beta float64
+	    Delta float64
 	}
 	

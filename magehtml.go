@@ -48,9 +48,16 @@ func mkIndexPage() (err error) {
 func indexBody() (body *HtmlTree) {
 	var rows []interface{}
 	for _, parm := range MetaParms {
+		var btn *HtmlTree
+		switch parm.Settable {
+		case false:
+			btn = Td(`class="PARM"`) // empty cell
+		case true:
+			btn = Td(`class="PARM"`, Button(`class="PARM"`, "Set"))
+		}
 		readout := Td(fmt.Sprintf(`id="%s" class="PARM"`, parm.Name))
 		label := Td(`class="PARM"`, parm.Name)
-		rows = append(rows, Tr(`class="PARM"`, label, readout))
+		rows = append(rows, Tr(`class="PARM"`, btn, label, readout))
 	}
 	body = Body(``, Table(`class="PARM"`, rows...))
 	return

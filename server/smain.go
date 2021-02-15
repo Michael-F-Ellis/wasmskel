@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -18,6 +19,7 @@ func main() {
 	mux.HandleFunc("/wasm_exec.js", wasmExecRequestHandler)
 	mux.HandleFunc("/json.wasm", jsonWasmRequestHandler)
 	mux.HandleFunc("/get", getRequestHandler)
+	mux.HandleFunc("/set", setRequestHandler)
 	mux.HandleFunc("/", indexRequestHandler)
 	log.Fatal(http.ListenAndServe(":9090", mux))
 }
@@ -81,4 +83,49 @@ func updater() {
 		time.Sleep(time.Second)
 		State.DirectUpdate(f)
 	}
+}
+
+// //////////////////////////
+// Handler for /set requests
+// //////////////////////////
+
+// setRequestHandler processes JSON requests that specify new
+// values for changeable parameters.
+func setRequestHandler(w http.ResponseWriter, r *http.Request) {
+	var err error
+	// try to read the request body
+	jsn, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fail(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	r.Body.Close()
+	// Extract the json to a map of RawMessage values
+	// to allow piecemeal unmarshalling of fields
+	var objmap map[string]*json.RawMessage
+	err = json.Unmarshal(jsn, &objmap)
+	if err != nil {
+		fail(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	// Permit only 1 item to be changed
+	if len(objmap) != 1 {
+		err = fmt.Errorf("only one item per set request, please, found %d", len(objmap))
+		fail(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	for name, rawval := range objmap {
+		err = dispatcher(name, rawval)
+		if err != nil {
+			err = fmt.Errorf("couldn't set new value for %s: %v", name, err)
+			fail(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		success(w, []byte(`{"Err":null}`))
+		return
+
+	}
+
 }

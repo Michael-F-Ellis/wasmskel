@@ -14,13 +14,15 @@ const (
 )
 
 type Meta struct {
-	Name string
-	Type string
+	Name     string
+	Type     string
+	Settable bool
 }
 
 var MetaParms = []Meta{
 	{Name: "Alpha", Type: Float},
 	{Name: "Beta", Type: Float},
+	{Name: "Delta", Type: Float, Settable: true},
 }
 
 // mkState generates internal/common/state.go
@@ -83,4 +85,57 @@ func mkUpdater() (err error) {
 
 	err = t.Execute(dst, MetaParms)
 	return
+}
+
+func mkDispatcher() (err error) {
+	tmpl := `
+	package main
+	
+	import (
+		"fmt"
+		"encoding/json"
+		"github.com/Michael-F-Ellis/wasmskel/internal/common"
+	)
+
+	// UnsettableErr returns an err whose string value indicates an attempt to
+    // set an unsettable variable
+    func unsettableErr(varName string) error {
+        return fmt.Errorf("%s is not settable", varName)
+    }
+
+	// dispatcher invokes the setter function for the requested jsonName
+	func dispatcher(jsonName string, rawval *json.RawMessage) (err error) {
+		switch jsonName {
+		{{range .}}
+		case "{{.Name}}":
+		  {{- if not .Settable}}
+			err = unsettableErr("{{.Name}}")
+		  {{- else if eq .Type "float64"}}
+		    var value float64
+			err = json.Unmarshal(*rawval, &value)
+			if err != nil {
+				err = fmt.Errorf("couldn't unmarshal value for {{.Name}}: %v", err)
+				return
+			}
+			sp := &State
+			sp.DirectUpdate(func(p *common.State) { p.{{.Name}}=value })
+			{{- end}}
+		{{- end}}
+		}
+		return
+	}
+	`
+	t, err := template.New("dispatcher").Parse(tmpl)
+	if err != nil {
+		return
+	}
+	dst, err := os.Create(path.Join(ServerPath, "dispatch.go"))
+	if err != nil {
+		return
+	}
+	defer func() { dst.Close() }()
+
+	err = t.Execute(dst, MetaParms)
+	return
+
 }

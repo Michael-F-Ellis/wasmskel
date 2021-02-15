@@ -64,6 +64,7 @@ func Build() {
 	must(os.Chdir(WasmPath))
 	must(sh.Run("env", "GOOS=js", "GOARCH=wasm", "go", "build", "-o", path.Join(AssetsPath, "json.wasm")))
 	// Build and install the server
+	must(mkDispatcher())
 	must(os.Chdir(ServerPath))
 	must(sh.Run("go", "build", "-o", path.Join(MageRoot, "serve")))
 }
