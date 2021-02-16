@@ -56,21 +56,22 @@ func Build() {
 	// Generate the common state struct
 	must(mkState())
 	// Generate the web page
-	must(mkIndexPage())
+	must(IndexPage())
 	// Install fresh copy of wasm_exec.js from go installation
 	must(sh.Run("cp", fmt.Sprintf("%s/misc/wasm/wasm_exec.js", GoRoot), AssetsPath))
 	// Build and install the WASM
 	must(mkUpdater())
 	must(os.Chdir(WasmPath))
 	must(sh.Run("go", "fmt", "updater_g.go"))
-	must(sh.Run("env", "GOOS=js", "GOARCH=wasm", "go", "build", "-o", path.Join(AssetsPath, "json.wasm")))
+	must(sh.Run("env", "GOOS=js", "GOARCH=wasm", "go", "build", "-o", path.Join(AssetsPath, "app.wasm")))
 	// Build and install the server
 	must(mkDispatcher())
 	must(os.Chdir(ServerPath))
+	must(sh.Run("go", "fmt", "dispatch_g.go"))
 	must(sh.Run("go", "build", "-o", path.Join(MageRoot, "serve")))
 }
 
-func Test() {
+func Run() {
 	mg.Deps(Build)
 	// launch the server
 	sh.Run(path.Join(MageRoot, "serve"))
@@ -84,6 +85,6 @@ func Clean() {
 		}
 	}
 	must(os.Remove(path.Join(MageRoot, "serve")))
-	must(os.Remove(path.Join(AssetsPath, "json.wasm")))
+	must(os.Remove(path.Join(AssetsPath, "app.wasm")))
 	must(os.Remove(path.Join(AssetsPath, "wasm_exec.js")))
 }

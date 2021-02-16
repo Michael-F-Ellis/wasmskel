@@ -11,31 +11,39 @@ import (
 	"github.com/Michael-F-Ellis/wasmskel/internal/common"
 )
 
+// This is the global state that is shared via a JSON API.
 var State = common.State{}
 
+// Main launches a goroutine that continually updates the global state. Then it
+// defines the allowed http requests and enters a ListenAndServe loop.
 func main() {
-	go updater()
+	go Updater()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/wasm_exec.js", wasmExecRequestHandler)
-	mux.HandleFunc("/json.wasm", jsonWasmRequestHandler)
+	mux.HandleFunc("/app.wasm", appWasmRequestHandler)
 	mux.HandleFunc("/get", getRequestHandler)
 	mux.HandleFunc("/set", setRequestHandler)
 	mux.HandleFunc("/", indexRequestHandler)
 	log.Fatal(http.ListenAndServe(":9090", mux))
 }
 
+// indexRequestHandler serves the index web page.
 func indexRequestHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./assets/index.html")
 }
 
+// wasmExecRequestHandler serves the Go wasm_exec.js file required for interface
+// Go WebAssembly code to a browser's javascript system.
 func wasmExecRequestHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./assets/wasm_exec.js")
 }
 
-func jsonWasmRequestHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./assets/json.wasm")
+// appWasmRequestHandler serves the app's compiled WebAssembly file.
+func appWasmRequestHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./assets/app.wasm")
 }
 
+// getRequestHandler sends the global state in JSON encoded format.
 func getRequestHandler(w http.ResponseWriter, r *http.Request) {
 	stateP := State.Get()
 	jsonRecord, err := GetJSON(stateP)
@@ -67,14 +75,14 @@ func fail(w http.ResponseWriter, msg string, status int) {
 // GetJSON returns a JSON representation of the values of
 // MonitorParameters that are part of the JSON API.
 func GetJSON(sp *common.State) (jsn []byte, err error) {
-
 	mpcopy := sp.Get()
 	jsn, err = json.Marshal(mpcopy)
 	return
 }
 
-// updater continually changes MonitoredParameters state
-func updater() {
+// Updater continually changes MonitoredParameters state, simulating
+// an arbitrary back-end process.
+func Updater() {
 	f := func(p *common.State) {
 		p.Alpha += 1
 		p.Beta += 2
@@ -84,10 +92,6 @@ func updater() {
 		State.DirectUpdate(f)
 	}
 }
-
-// //////////////////////////
-// Handler for /set requests
-// //////////////////////////
 
 // setRequestHandler processes JSON requests that specify new
 // values for changeable parameters.
@@ -115,17 +119,15 @@ func setRequestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Dispatch the request and return the result
 	for name, rawval := range objmap {
-		err = dispatcher(name, rawval)
+		err = Dispatcher(name, rawval)
 		if err != nil {
 			err = fmt.Errorf("couldn't set new value for %s: %v", name, err)
 			fail(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-
 		success(w, []byte(`{"Err":null}`))
 		return
-
 	}
-
 }

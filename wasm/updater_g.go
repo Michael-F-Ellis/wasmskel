@@ -5,7 +5,9 @@ package main
 
 import "fmt"
 
-func updateStateTable() {
+// UpdateParmReadouts copies the current values from the global state into
+// the corresponding cells in the Parameter Values table.
+func UpdateParmReadouts() {
 	var err error
 
 	err = setElementAttributeById("Alpha", "textContent", fmt.Sprintf("%0.2f", SP.Alpha))
