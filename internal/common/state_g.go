@@ -7,6 +7,8 @@
 	
 	    Alpha float64
 	    Beta float64
+	    Gamma float64
 	    Delta float64
+	    Zeta float64
 	}
 	

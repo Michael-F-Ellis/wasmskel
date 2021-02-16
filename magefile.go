@@ -62,6 +62,7 @@ func Build() {
 	// Build and install the WASM
 	must(mkUpdater())
 	must(os.Chdir(WasmPath))
+	must(sh.Run("go", "fmt", "updater_g.go"))
 	must(sh.Run("env", "GOOS=js", "GOARCH=wasm", "go", "build", "-o", path.Join(AssetsPath, "json.wasm")))
 	// Build and install the server
 	must(mkDispatcher())

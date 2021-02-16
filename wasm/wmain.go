@@ -3,6 +3,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -20,8 +21,25 @@ var SP = &State
 
 func main() {
 	fmt.Println("Go Web Assembly")
+	js.Global().Set("Setter", SetterWrapper())
 	go getter()
 	select {}
+}
+
+func SetterWrapper() (jsf js.Func) {
+	jsf = js.FuncOf(
+		func(this js.Value, args []js.Value) (result interface{}) {
+			if len(args) != 1 {
+				result := map[string]interface{}{
+					"error": "Invalid no of arguments passed",
+				}
+				return result
+			}
+			setterChan <- []byte(args[0].String())
+			return
+		},
+	)
+	return
 }
 
 /*
@@ -103,12 +121,22 @@ func prettyJson(input string) (string, error) {
 }
 */
 
+var setterChan = make(chan []byte, 1)
+
 // getter fetches State from the server once per second. It must be invoked as a
 // goroutine.
 func getter() {
 	for {
 		var err error
-		time.Sleep(time.Second)
+		select {
+		case jsonData := <-setterChan:
+			err = setFloat(jsonData, "/set", 2)
+			if err != nil {
+				fmt.Println(err)
+			}
+		case <-time.After(time.Second):
+		}
+		// in either case update the state
 		_, err = getStateFromServer()
 		if err != nil {
 			fmt.Println(err)
@@ -145,5 +173,28 @@ func getStateFromServer() (jbytes []byte, err error) {
 		return
 	}
 	SP.DirectUpdate(func(p *common.State) { *p = *mp })
+	return
+}
+
+func setFloat(jsonData []byte, url string, timeout int64) (err error) {
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+	//fmt.Println("Request Header:", req.Header)
+	fmt.Println("Request Body:", req.Body)
+	client := &http.Client{}
+	client.Timeout = time.Duration(timeout * 1e9) // nanoseconds, hence the 1e9 to get seconds
+	resp, err := client.Do(req)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("response Status:", resp.Status)
+	// fmt.Println("response Headers:", resp.Header)
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println("response Body:", string(body))
 	return
 }

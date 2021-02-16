@@ -53,12 +53,22 @@ func indexBody() (body *HtmlTree) {
 		case false:
 			btn = Td(`class="PARM"`) // empty cell
 		case true:
-			btn = Td(`class="PARM"`, Button(`class="PARM"`, "Set"))
+			onclick := fmt.Sprintf(`onclick='SetterPrompt("%s")'`, parm.Name)
+			btn = Td(`class="PARM"`, Button(`class="PARM" `+onclick, "Set"))
 		}
 		readout := Td(fmt.Sprintf(`id="%s" class="PARM"`, parm.Name))
 		label := Td(`class="PARM"`, parm.Name)
 		rows = append(rows, Tr(`class="PARM"`, btn, label, readout))
 	}
-	body = Body(``, Table(`class="PARM"`, rows...))
+	setter := Script(``, `
+		SetterPrompt = function (name) {
+			var oldvalue = document.getElementById(name).innerText
+    		var value = prompt("Enter new value for " +  name, oldvalue);
+    		if (value != null) {
+        		Setter('{"' + name + '":' + value + '}')
+    		}
+		}`)
+
+	body = Body(``, Table(`class="PARM"`, rows...), setter)
 	return
 }

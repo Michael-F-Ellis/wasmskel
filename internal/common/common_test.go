@@ -7,7 +7,7 @@ import (
 )
 
 func TestGet(t *testing.T) {
-	mp := State{1, 2}
+	mp := State{Alpha: 1, Beta: 2, Gamma: 3}
 	mpCopy := *mp.Get()
 	if diff := deep.Equal(mp, mpCopy); diff != nil {
 		t.Errorf("%v", diff)
@@ -19,7 +19,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestDirectUpdate(t *testing.T) {
-	mp := &State{1, 2}
+	mp := State{Alpha: 1, Beta: 2, Gamma: 3}
 	f := func(p *State) {
 		p.Beta = 13
 	}

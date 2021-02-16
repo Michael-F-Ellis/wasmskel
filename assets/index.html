@@ -34,14 +34,41 @@
       </tr>
       <tr class="PARM">
         <td class="PARM">
-          <button class="PARM">Set
+          <button class="PARM" onclick='SetterPrompt("Gamma")'>Set
           </button>
+        </td>
+        <td class="PARM">Gamma
+        </td>
+        <td id="Gamma" class="PARM">
+        </td>
+      </tr>
+      <tr class="PARM">
+        <td class="PARM">
         </td>
         <td class="PARM">Delta
         </td>
         <td id="Delta" class="PARM">
         </td>
       </tr>
+      <tr class="PARM">
+        <td class="PARM">
+          <button class="PARM" onclick='SetterPrompt("Zeta")'>Set
+          </button>
+        </td>
+        <td class="PARM">Zeta
+        </td>
+        <td id="Zeta" class="PARM">
+        </td>
+      </tr>
     </table>
+    <script>
+		SetterPrompt = function (name) {
+			var oldvalue = document.getElementById(name).innerText
+    		var value = prompt("Enter new value for " +  name, oldvalue);
+    		if (value != null) {
+        		Setter('{"' + name + '":' + value + '}')
+    		}
+		}
+    </script>
   </body>
 </html>

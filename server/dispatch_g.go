@@ -21,15 +21,26 @@
 			err = unsettableErr("Alpha")
 		case "Beta":
 			err = unsettableErr("Beta")
-		case "Delta":
+		case "Gamma":
 		    var value float64
 			err = json.Unmarshal(*rawval, &value)
 			if err != nil {
-				err = fmt.Errorf("couldn't unmarshal value for Delta: %v", err)
+				err = fmt.Errorf("couldn't unmarshal value for Gamma: %v", err)
 				return
 			}
 			sp := &State
-			sp.DirectUpdate(func(p *common.State) { p.Delta=value })
+			sp.DirectUpdate(func(p *common.State) { p.Gamma=value })
+		case "Delta":
+			err = unsettableErr("Delta")
+		case "Zeta":
+		    var value float64
+			err = json.Unmarshal(*rawval, &value)
+			if err != nil {
+				err = fmt.Errorf("couldn't unmarshal value for Zeta: %v", err)
+				return
+			}
+			sp := &State
+			sp.DirectUpdate(func(p *common.State) { p.Zeta=value })
 		}
 		return
 	}
