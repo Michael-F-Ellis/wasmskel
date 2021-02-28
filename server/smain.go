@@ -1,8 +1,10 @@
 package main
 
 import (
+	"embed"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -14,33 +16,29 @@ import (
 // This is the global state that is shared via a JSON API.
 var State = common.State{}
 
+// The assets directory contains static files served by the application.
+//go:embed assets
+var assets embed.FS
+
 // Main launches a goroutine that continually updates the global state. Then it
 // defines the allowed http requests and enters a ListenAndServe loop.
 func main() {
 	go Updater()
 	mux := http.NewServeMux()
-	mux.HandleFunc("/wasm_exec.js", wasmExecRequestHandler)
-	mux.HandleFunc("/app.wasm", appWasmRequestHandler)
+	// fs.Sub returns a file system rooted under our embedded assets directory
+	// so that a request for, say, "/app.wasm" returns the file in "assets/app.wasm"
+	assetSys, err := fs.Sub(assets, "assets")
+	if err != nil {
+		panic("failed to create sub-tree of assets") // should never happen
+	}
+	// The "/get" and "/set" urls are dynamic, i.e. they return the results
+	// from computation rather than static files.
 	mux.HandleFunc("/get", getRequestHandler)
 	mux.HandleFunc("/set", setRequestHandler)
-	mux.HandleFunc("/", indexRequestHandler)
+	// The following creates a handler for static file requests.
+	mux.Handle("/", http.FileServer(http.FS(assetSys)))
+	// Launch the http service
 	log.Fatal(http.ListenAndServe(":9090", mux))
-}
-
-// indexRequestHandler serves the index web page.
-func indexRequestHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./assets/index.html")
-}
-
-// wasmExecRequestHandler serves the Go wasm_exec.js file required for interface
-// Go WebAssembly code to a browser's javascript system.
-func wasmExecRequestHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./assets/wasm_exec.js")
-}
-
-// appWasmRequestHandler serves the app's compiled WebAssembly file.
-func appWasmRequestHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./assets/app.wasm")
 }
 
 // getRequestHandler sends the global state in JSON encoded format.
@@ -73,14 +71,14 @@ func fail(w http.ResponseWriter, msg string, status int) {
 }
 
 // GetJSON returns a JSON representation of the values of
-// MonitorParameters that are part of the JSON API.
+// State that are part of the JSON API.
 func GetJSON(sp *common.State) (jsn []byte, err error) {
 	mpcopy := sp.Get()
 	jsn, err = json.Marshal(mpcopy)
 	return
 }
 
-// Updater continually changes MonitoredParameters state, simulating
+// Updater continually changes State, simulating
 // an arbitrary back-end process.
 func Updater() {
 	f := func(p *common.State) {

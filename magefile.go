@@ -38,7 +38,7 @@ func initPaths() {
 	MageRoot, err = os.Getwd()
 	must(err)
 	fmt.Println(MageRoot)
-	AssetsPath = path.Join(MageRoot, "assets")
+	AssetsPath = path.Join(MageRoot, "server", "assets")
 	InternalPath = path.Join(MageRoot, "internal")
 	CommonPath = path.Join(InternalPath, "common")
 	ServerPath = path.Join(MageRoot, "server")
@@ -87,4 +87,5 @@ func Clean() {
 	must(os.Remove(path.Join(MageRoot, "serve")))
 	must(os.Remove(path.Join(AssetsPath, "app.wasm")))
 	must(os.Remove(path.Join(AssetsPath, "wasm_exec.js")))
+	must(os.Remove(path.Join(AssetsPath, "index.html")))
 }
