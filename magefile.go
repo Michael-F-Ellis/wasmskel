@@ -79,17 +79,17 @@ func Run() {
 
 func Clean() {
 	initPaths()
-	must := func(_err error) {
+	check := func(_err error) {
 		if _err != nil {
-			log.Fatal(_err)
+			log.Println(_err)
 		}
 	}
-	must(os.Remove(path.Join(MageRoot, "serve")))
-	must(os.Remove(path.Join(AssetsPath, "app.wasm")))
-	must(os.Remove(path.Join(AssetsPath, "wasm_exec.js")))
-	must(os.Remove(path.Join(AssetsPath, "index.html")))
-	must(os.Remove(path.Join(InternalPath, "state_g.go")))
-	must(os.Remove(path.Join(ServerPath, "dispatch_g.go")))
-	must(os.Remove(path.Join(WasmPath, "updater_g.go")))
+	check(os.Remove(path.Join(MageRoot, "serve")))
+	check(os.Remove(path.Join(AssetsPath, "app.wasm")))
+	check(os.Remove(path.Join(AssetsPath, "wasm_exec.js")))
+	check(os.Remove(path.Join(AssetsPath, "index.html")))
+	check(os.Remove(path.Join(CommonPath, "state_g.go")))
+	check(os.Remove(path.Join(ServerPath, "dispatch_g.go")))
+	check(os.Remove(path.Join(WasmPath, "updater_g.go")))
 
 }
