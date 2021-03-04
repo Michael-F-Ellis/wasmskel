@@ -88,4 +88,8 @@ func Clean() {
 	must(os.Remove(path.Join(AssetsPath, "app.wasm")))
 	must(os.Remove(path.Join(AssetsPath, "wasm_exec.js")))
 	must(os.Remove(path.Join(AssetsPath, "index.html")))
+	must(os.Remove(path.Join(InternalPath, "state_g.go")))
+	must(os.Remove(path.Join(ServerPath, "dispatch_g.go")))
+	must(os.Remove(path.Join(WasmPath, "updater_g.go")))
+
 }
