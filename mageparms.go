@@ -29,7 +29,7 @@ var MetaParms = []Meta{
 	{Name: "Zeta", Type: Float, Settable: true},
 }
 
-// mkState generates internal/common/state.go, the data definitions shared
+// mkState generates internal/common/state_g.go, the data definitions shared
 // by the server and the web client.
 func mkState() (err error) {
 	tmpl := `

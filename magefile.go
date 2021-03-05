@@ -4,9 +4,12 @@ package main
 
 import (
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path"
+	"path/filepath"
+	"strings"
 
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
@@ -77,6 +80,7 @@ func Run() {
 	sh.Run(path.Join(MageRoot, "serve"))
 }
 
+// Clean removes executables and  generated source files.
 func Clean() {
 	initPaths()
 	check := func(_err error) {
@@ -88,8 +92,19 @@ func Clean() {
 	check(os.Remove(path.Join(AssetsPath, "app.wasm")))
 	check(os.Remove(path.Join(AssetsPath, "wasm_exec.js")))
 	check(os.Remove(path.Join(AssetsPath, "index.html")))
-	check(os.Remove(path.Join(CommonPath, "state_g.go")))
-	check(os.Remove(path.Join(ServerPath, "dispatch_g.go")))
-	check(os.Remove(path.Join(WasmPath, "updater_g.go")))
+	// By convention, names of generated Go files in this module end with
+	// "_g.go". Walk the directory tree and remove them
+	var walker filepath.WalkFunc = func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
+			return err
+		}
+		if !info.IsDir() && strings.HasSuffix(info.Name(), "_g.go") {
+			check(os.Remove(path))
+		}
+		return nil
+	}
+	// Take a walk ...
+	check(filepath.Walk(".", walker))
 
 }
