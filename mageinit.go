@@ -22,9 +22,9 @@ func Init() {
 			log.Fatal(err)
 		}
 	}
-	srcmod, newmod, err := getSourceAndRemoteOrigin()
+	modname, remotename, err := getModNameAndRemoteOrigin()
 	must(err)
-	if !prompter.YN(fmt.Sprintf(`Update go module references from "%s" to "%s"?`, srcmod, newmod), true) {
+	if !prompter.YN(fmt.Sprintf(`Update go module from "%s" to "%s"?`, modname, remotename), true) {
 		log.Fatal(errors.New("Init cancelled."))
 	}
 	// Walk the tree and change all the instances of srcmod
@@ -39,7 +39,7 @@ func Init() {
 			if err != nil {
 				return err
 			}
-			newContents := strings.Replace(string(read), srcmod, newmod, -1)
+			newContents := strings.Replace(string(read), modname, remotename, -1)
 			err = ioutil.WriteFile(path, []byte(newContents), 0)
 			if err != nil {
 				return err
@@ -50,15 +50,15 @@ func Init() {
 	// Make the changes
 	must(filepath.Walk(".", walker))
 	// Edit go.mod
-	must(sh.Run("go", "mod", "edit", "--module", newmod))
+	must(sh.Run("go", "mod", "edit", "--module", remotename))
 	must(sh.Run("go", "mod", "tidy"))
 
 }
 
-// getSourceAndRemoteOrigin returns the module name and the remote origin
-func getSourceAndRemoteOrigin() (srcmod, newmod string, err error) {
+// getModNameAndRemoteOrigin returns the module name and the remote origin
+func getModNameAndRemoteOrigin() (modname, remotename string, err error) {
 	// read srcmod from go.mod
-	srcmod, err = sh.Output("go", "list", "-m")
+	modname, err = sh.Output("go", "list", "-m")
 	if err != nil {
 		err = fmt.Errorf("failed to read module name from go.mod: %v", err)
 		return
@@ -75,6 +75,6 @@ func getSourceAndRemoteOrigin() (srcmod, newmod string, err error) {
 	// reference.
 	splitUrl := strings.Split(remoteOriginUrl, "://")
 	noProtocol := splitUrl[len(splitUrl)-1]
-	newmod = strings.TrimSuffix(noProtocol, ".git")
+	remotename = strings.TrimSuffix(noProtocol, ".git")
 	return
 }
