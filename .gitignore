@@ -2,3 +2,4 @@ serve
 *.js
 *.wasm
 *_g.go
+*.html

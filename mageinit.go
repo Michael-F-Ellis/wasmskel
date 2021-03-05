@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/magefile/mage/sh"
 )
 
 func Init() {
@@ -34,22 +36,23 @@ func Init() {
 			return err
 		}
 		if !info.IsDir() && strings.HasSuffix(info.Name(), ".go") {
-			fmt.Printf("%s\n", info.Name())
+			fmt.Printf("Processing %s\n", info.Name())
 			read, err := ioutil.ReadFile(path)
 			if err != nil {
 				return err
 			}
 			newContents := strings.Replace(string(read), srcmod, newmod, -1)
-			fmt.Println(newContents[0:50])
-			/*
-				err = ioutil.WriteFile(path, []byte(newContents), 0)
-				if err != nil {
-					return err
-				}
-			*/
+			err = ioutil.WriteFile(path, []byte(newContents), 0)
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	}
+	// Make the changes
 	must(filepath.Walk(".", walker))
+	// Edit go.mod
+	must(sh.Run("go", "mod", "edit", "--module", newmod))
+	must(sh.Run("go", "mod", "tidy"))
 
 }
