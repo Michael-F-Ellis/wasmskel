@@ -3,32 +3,30 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"io/ioutil"
 	"log"
-	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/Songmu/prompter"
 	"github.com/magefile/mage/sh"
 )
 
+// Init initializes a clone of the repository
 func Init() {
 	var must = func(err error) {
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
-	// look for NEWMODULE in environment
-	newmod := os.Getenv("NEWMODULE")
-	if newmod == "" {
-		must(fmt.Errorf("Init requires NEWMODULE to be defined in the environment"))
+	srcmod, newmod, err := getSourceAndRemoteOrigin()
+	must(err)
+	if !prompter.YN(fmt.Sprintf(`Update go module references from "%s" to "%s"?`, srcmod, newmod), true) {
+		log.Fatal(errors.New("Init cancelled."))
 	}
-	// Compose the source module name string (so we don't overwrite it in this func)
-	srcmod := "github.com/" + "Michael-F-Ellis/" + "wasmskel"
-	fmt.Printf("Source Module is %s\n", srcmod)
-
 	// Walk the tree and change all the instances of srcmod
 	var walker filepath.WalkFunc = func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
@@ -55,4 +53,28 @@ func Init() {
 	must(sh.Run("go", "mod", "edit", "--module", newmod))
 	must(sh.Run("go", "mod", "tidy"))
 
+}
+
+// getSourceAndRemoteOrigin returns the module name and the remote origin
+func getSourceAndRemoteOrigin() (srcmod, newmod string, err error) {
+	// read srcmod from go.mod
+	srcmod, err = sh.Output("go", "list", "-m")
+	if err != nil {
+		err = fmt.Errorf("failed to read module name from go.mod: %v", err)
+		return
+	}
+	// Read remote origin URL with git
+	remoteOriginUrl, err := sh.Output("git", "remote", "get-url", "origin")
+	if err != nil {
+		err = fmt.Errorf("failed to read remote origin: %v", err)
+		return
+	}
+	// need to strip protocol, e.g. "https://" and ".git" suffix from URL so
+	// that "https://github.com/SomeOne/somerepo.git" becomes
+	// "github.com/SomeOne/somerepo" which is the proper form for a go module
+	// reference.
+	splitUrl := strings.Split(remoteOriginUrl, "://")
+	noProtocol := splitUrl[len(splitUrl)-1]
+	newmod = strings.TrimSuffix(noProtocol, ".git")
+	return
 }
