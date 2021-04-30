@@ -19,13 +19,12 @@ var Default = Build
 
 // Project directory tree. Values populated initPaths()
 var (
-	MageRoot     string // location of this file
-	GoRoot       string // path to go installation
-	AssetsPath   string // assets subdir
-	InternalPath string // cmd/internal subdir
-	CommonPath   string // common subdir
-	ServerPath   string // server subdir
-	WasmPath     string // wasm subdir
+	MageRoot   string // location of this file
+	GoRoot     string // path to go installation
+	AssetsPath string // assets subdir
+	CommonPath string // common subdir
+	ServerPath string // server subdir
+	WasmPath   string // wasm subdir
 )
 
 // initPaths populates the global path variables that define the project tree
@@ -42,8 +41,7 @@ func initPaths() {
 	must(err)
 	fmt.Println(MageRoot)
 	AssetsPath = path.Join(MageRoot, "server", "assets")
-	InternalPath = path.Join(MageRoot, "internal")
-	CommonPath = path.Join(InternalPath, "common")
+	CommonPath = path.Join(MageRoot, "common")
 	ServerPath = path.Join(MageRoot, "server")
 	WasmPath = path.Join(MageRoot, "wasm")
 }

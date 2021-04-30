@@ -29,7 +29,7 @@ var MetaParms = []Meta{
 	{Name: "Zeta", Type: Float, Settable: true},
 }
 
-// mkState generates internal/common/state_g.go, the data definitions shared
+// mkState generates common/state_g.go, the data definitions shared
 // by the server and the web client.
 func mkState() (err error) {
 	tmpl := `
@@ -103,7 +103,7 @@ func mkDispatcher() (err error) {
 	import (
 		"fmt"
 		"encoding/json"
-		"github.com/Michael-F-Ellis/wasmskel/internal/common"
+		"github.com/Michael-F-Ellis/wasmskel/common"
 	)
 
 	// UnsettableErr returns an err whose string value indicates an attempt to

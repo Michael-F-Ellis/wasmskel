@@ -4,7 +4,7 @@
 			"path": "server"
 		},
 		{
-			"path": "internal"
+			"path": "common"
 		},
 		{
 			"path": "wasm"

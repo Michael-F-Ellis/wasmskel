@@ -12,7 +12,7 @@ import (
 	"syscall/js"
 	"time"
 
-	"github.com/Michael-F-Ellis/wasmskel/internal/common"
+	"github.com/Michael-F-Ellis/wasmskel/common"
 )
 
 // global copy of state obtained periodically from server

@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Michael-F-Ellis/wasmskel/internal/common"
+	"github.com/Michael-F-Ellis/wasmskel/common"
 )
 
 // This is the global state that is shared via a JSON API.
