@@ -25,7 +25,7 @@ func TestDirectUpdate(t *testing.T) {
 	}
 	mp.DirectUpdate(f)
 	p := mp.Get()
-	if diff := deep.Equal(mp, p); diff != nil {
+	if diff := deep.Equal(mp, *p); diff != nil {
 		t.Errorf("%v", diff)
 	}
 

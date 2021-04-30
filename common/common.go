@@ -1,19 +1,23 @@
+// Code used in both wasm and server
+
 package common
 
-// Code used in both wasm and server
 import "sync"
 
-var SMutex sync.Mutex
+var sMutex sync.Mutex
 
+// Get returns a pointer to a copy of a State struct. Get is concurrency-safe.
 func (sp *State) Get() *State {
-	SMutex.Lock()
-	defer SMutex.Unlock()
+	sMutex.Lock()
+	defer sMutex.Unlock()
 	safeCopy := *sp
 	return &safeCopy
 }
 
+// Set updates a state struct by applying a user supplied function that modifies
+// the struct. Set is concurrency safe.
 func (sp *State) DirectUpdate(f func(p *State)) {
-	SMutex.Lock()
-	defer SMutex.Unlock()
+	sMutex.Lock()
+	defer sMutex.Unlock()
 	f(sp)
 }
