@@ -47,6 +47,7 @@ func initPaths() {
 }
 
 func Build() {
+	mg.Deps(Init)
 	initPaths()
 	must := func(_err error) {
 		if _err != nil {

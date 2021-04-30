@@ -24,6 +24,11 @@ func Init() {
 	}
 	modname, remotename, err := getModNameAndRemoteOrigin()
 	must(err)
+	// Already initialized if module and remote names are the same
+	if modname == remotename {
+		return
+	}
+	// Otherwise ask user to confirm initialization
 	if !prompter.YN(fmt.Sprintf(`Update go module from "%s" to "%s"?`, modname, remotename), true) {
 		log.Fatal(errors.New("Init cancelled."))
 	}
