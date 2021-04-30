@@ -9,7 +9,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
+	"regexp"
 
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
@@ -91,14 +91,17 @@ func Clean() {
 	check(os.Remove(path.Join(AssetsPath, "app.wasm")))
 	check(os.Remove(path.Join(AssetsPath, "wasm_exec.js")))
 	check(os.Remove(path.Join(AssetsPath, "index.html")))
-	// By convention, names of generated Go files in this module end with
+
+	// Other generated files have names ending "_g.*"
+	re := regexp.MustCompile(`_g\.\S+$`) // the pattern to match
+	// By convention, names of generated files in this module end with
 	// "_g.go". Walk the directory tree and remove them
 	var walker filepath.WalkFunc = func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
 			return err
 		}
-		if !info.IsDir() && strings.HasSuffix(info.Name(), "_g.go") {
+		if !info.IsDir() && ("" != re.FindString(info.Name())) {
 			check(os.Remove(path))
 		}
 		return nil

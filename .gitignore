@@ -1,5 +1,14 @@
-serve
-*.js
+# The server app
+serve 
+
+# Go's wasm to js interface
+wasm_exec.js
+
+# WebAssembly apps
 *.wasm
-*_g.go
-*.html
+
+# Generated start page must have this name
+index.html
+
+# All other generated files that follow this naming convention.
+*_g.*
