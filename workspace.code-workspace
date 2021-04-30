@@ -1,12 +1,6 @@
 {
 	"folders": [
 		{
-			"path": "server"
-		},
-		{
-			"path": "common"
-		},
-		{
 			"path": "wasm"
 		},
 		{
