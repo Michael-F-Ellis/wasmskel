@@ -46,7 +46,8 @@ func initPaths() {
 	WasmPath = path.Join(MageRoot, "wasm")
 }
 
-func Build() {
+// Generate creates source files that depend on MetaParms
+func Generate() {
 	mg.Deps(Init)
 	initPaths()
 	must := func(_err error) {
@@ -56,23 +57,36 @@ func Build() {
 	}
 	defer os.Chdir(MageRoot)
 	// Generate the common state struct
-	must(mkState())
+	must(genState())
 	// Generate the web page
-	must(IndexPage())
+	must(genIndexPage())
 	// Install fresh copy of wasm_exec.js from go installation
 	must(sh.Run("cp", fmt.Sprintf("%s/misc/wasm/wasm_exec.js", GoRoot), AssetsPath))
+	// Generate the wasm client's updater function
+	must(genUpdater())
+	// Generate the server's dispatcher function
+	must(genDispatcher())
+
+}
+
+// Build compiles the server and the Web Assembly client.
+func Build() {
+	mg.Deps(Generate)
+	must := func(_err error) {
+		if _err != nil {
+			log.Fatal(_err)
+		}
+	}
+	defer os.Chdir(MageRoot)
 	// Build and install the WASM
-	must(mkUpdater())
 	must(os.Chdir(WasmPath))
-	must(sh.Run("go", "fmt", "updater_g.go"))
 	must(sh.Run("env", "GOOS=js", "GOARCH=wasm", "go", "build", "-o", path.Join(AssetsPath, "app.wasm")))
 	// Build and install the server
-	must(mkDispatcher())
 	must(os.Chdir(ServerPath))
-	must(sh.Run("go", "fmt", "dispatch_g.go"))
 	must(sh.Run("go", "build", "-o", path.Join(MageRoot, "serve")))
 }
 
+// Run builds and executes the server
 func Run() {
 	mg.Deps(Build)
 	// launch the server
@@ -94,8 +108,8 @@ func Clean() {
 
 	// Other generated files have names ending "_g.*"
 	re := regexp.MustCompile(`_g\.\S+$`) // the pattern to match
-	// By convention, names of generated files in this module end with
-	// "_g.go". Walk the directory tree and remove them
+
+	// Walk the directory tree and remove them
 	var walker filepath.WalkFunc = func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)

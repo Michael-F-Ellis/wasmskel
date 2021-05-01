@@ -11,8 +11,8 @@ import (
 	. "github.com/Michael-F-Ellis/goht" // dot import makes sense here
 )
 
-// IndexPage generates assets/index.html
-func IndexPage() (err error) {
+// genIndexPage generates assets/index.html
+func genIndexPage() (err error) {
 	var buf bytes.Buffer
 	// <head>
 	head := Head("",
